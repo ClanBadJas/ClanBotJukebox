@@ -1,0 +1,23 @@
+version: "3.9"
+services:
+  clanbotjukebox:
+    container_name: clanbotjukebox
+    image: clanbadjas/clanbotjukebox:latest
+    env_file: .env
+    restart: unless-stopped
+    networks:
+      - lavanet
+    depends_on:
+      - lavalink
+
+  lavalink:
+    container_name: clanbotjukebox_lava
+    image: fredboat/lavalink:latest
+    restart: unless-stopped
+    networks:
+      - lavanet
+    volumes:
+      - /opt/discord/ClanBotJas-Dev/ClanBotJas/lavalink:/opt/Lavalink
+
+networks:
+  lavanet:
