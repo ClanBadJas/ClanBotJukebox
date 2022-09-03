@@ -11,13 +11,15 @@ services:
       - lavalink
 
   lavalink:
-    container_name: clanbotjukebox_lava
+    container_name: clanbotjukebox-lava
     image: fredboat/lavalink:latest
     restart: unless-stopped
+    expose:
+      - 2333
     networks:
       - lavanet
     volumes:
-      - /opt/discord/ClanBotJas-Dev/ClanBotJas/lavalink:/opt/Lavalink
+      - /opt/discord/ClanBotJukebox/lavalink/application.yml:/opt/Lavalink/application.yml:ro
 
 networks:
   lavanet:

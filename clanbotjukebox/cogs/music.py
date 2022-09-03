@@ -1,3 +1,4 @@
+import functools
 import asyncio
 import re
 import time
@@ -10,8 +11,27 @@ from discord import slash_command, Option
 from discord.ext import commands
 from spotipy import SpotifyClientCredentials
 
+import cogmanager
+import settings
+
 RURL = re.compile(r'https?://(?:www\.)?.+')
-sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=DISCORD_SPOTIFY_CLIENT_ID, client_secret=DISCORD_SPOTIFY_CLIENT_TOKEN))
+sp = spotipy.Spotify(auth_manager=SpotifyClientCredentials(client_id=settings.DISCORD_SPOTIFY_CLIENT_ID, client_secret=settings.DISCORD_SPOTIFY_CLIENT_TOKEN))
+
+def slashcommandlogger(func):
+    """
+    Decorator that allows slash commands to be logged
+    :param func: original function
+    :return: wrapped function
+    """
+
+    @functools.wraps(func)
+    async def wrapped(self, ctx, *args, **kwargs):
+        # Some fancy foo stuff
+        await func(self, ctx, *args, **kwargs)
+        logChannel = self.client.get_channel(settings.DISCORD_LOG_CHANNEL)
+        await cogmanager.logCommand(logChannel, ctx, **kwargs)
+
+    return wrapped
 
 
 def create_embed(guild, track, position):
@@ -250,7 +270,7 @@ class Music(commands.Cog):
     async def connect_nodes(self):
         await self.client.wait_until_ready()
         lavaclient = lavalink.Client(self.client.user.id)
-        lavaclient.add_node(host=DISCORD_LAVALINK_HOST, port=DISCORD_LAVALINK_PORT, password=DISCORD_LAVALINK_PASSWORD, region=DISCORD_LAVALINK_REGION)
+        lavaclient.add_node(host=settings.DISCORD_LAVALINK_HOST, port=settings.DISCORD_LAVALINK_PORT, password=settings.DISCORD_LAVALINK_PASSWORD, region=settings.DISCORD_LAVALINK_REGION)
         lavaclient.add_event_hooks(self)
         self.client.lavalink = lavaclient
 
